@@ -59,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
-// Get book for editing
+// buch bearbeiten 
 $edit_book = null;
 if (isset($_GET['edit'])) {
     $id = $conn->real_escape_string($_GET['edit']);
@@ -102,6 +102,7 @@ $result = $conn->query($sql);
                     <th>Beschreibung</th>
                     <th>Preis</th>
                     <th>Aktionen</th>
+                    <th>Verfügbarkeit</th> 
                 </tr>";
 
         while($row = $result->fetch_assoc()) {
@@ -118,6 +119,9 @@ $result = $conn->query($sql);
                             <button type='submit' onclick='return confirm(\"Wirklich löschen?\")'>Löschen</button>
                         </form>
                     </td>
+                
+
+
                   </tr>";
         }
 
