@@ -15,9 +15,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $password = $_POST["password"] ?? "";
 
     // Fester Login für die Bibliothekarin
-    if ($username === "lenya" && $password === "passwort") {
+    if ($username === "Bibliothekar" && $password === "passwort") {
         $_SESSION['logged_in'] = true;
-        $_SESSION['username'] = "lenya";
+        $_SESSION['username'] = "Bibliothekar";
         header("Location: admin.php");
         exit;
     } else {

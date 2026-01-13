@@ -1,102 +1,96 @@
 <?php
 session_start();
 
-// Datenbankverbindung
-$host = "localhost";
-$user = "root";
-$pass = "";
-$dbname = "bibliothek";
-
-$conn = new mysqli($host, $user, $pass, $dbname);
+// DB-Verbindung
+$conn = new mysqli("localhost", "root", "", "bibliothek");
 $conn->set_charset("utf8");
 
-// Fehler prüfen
 if ($conn->connect_error) {
     die("Verbindung fehlgeschlagen: " . $conn->connect_error);
 }
 
-// Suchbegriff aus Formular
+// Suche
 $search = "";
 if (isset($_GET['q'])) {
     $search = $conn->real_escape_string($_GET['q']);
 }
 
-// SQL Suche leer → zeige alle Bücher
-$sql = "SELECT book_id, title, description, isbn, price FROM books";
+// Bücher + Status laden
+$sql = "
+SELECT 
+    b.book_id,
+    b.title,
+    b.description,
+    b.isbn,
+    CASE 
+        WHEN r.id IS NULL THEN 'verfügbar'
+        ELSE 'reserviert'
+    END AS status
+FROM books b
+LEFT JOIN reservations r ON b.book_id = r.book_id
+";
 
 if (!empty($search)) {
     $sql .= " WHERE 
-                title LIKE '%$search%' 
-                OR description LIKE '%$search%'
-                OR isbn LIKE '%$search%'";
+        b.title LIKE '%$search%' 
+        OR b.description LIKE '%$search%'
+        OR b.isbn LIKE '%$search%'";
 }
 
 $result = $conn->query($sql);
 ?>
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Bücher suchen - Bibliothek</title>
-    
+    <meta charset="UTF-8">
+    <title>Büchersuche</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <nav>
-        <a href="index.php">Home</a>
+<nav>
+    <a href="index.php">Home</a>
+    <?php if (!isset($_SESSION['logged_in'])): ?>
+        <a href="login.php">Login</a>
+    <?php else: ?>
+        <a href="admin.php">Admin</a>
+        <a href="logout.php">Logout</a>
+    <?php endif; ?>
+</nav>
 
-        <?php if (!isset($_SESSION['logged_in'])): ?>
-            <!-- Schüler sehen nur Login -->
-            <a href="login.php">Login</a>
-        <?php else: ?>
-            <!-- Bibliothekar sieht zusätzlich Admin und Logout -->
-            <a href="admin.php">Admin</a>
-            <a href="logout.php">Logout</a>
-        <?php endif; ?>
-    </nav>
+<h1>Büchersuche</h1>
 
-    <h1>Büchersuche</h1>
+<form method="GET">
+    <input type="text" name="q" value="<?= htmlspecialchars($search) ?>">
+    <button>Suchen</button>
+</form>
 
-    <!-- Suchfeld -->
-    <form method="GET" action="">
-        <input type="text" name="q" value="<?= htmlspecialchars($search) ?>" >
-        <button type="submit">Suchen</button>
-    </form>
+<hr>
 
-    <hr>
+<table border="1" cellpadding="8">
+<tr>
+    <th>Titel</th>
+    <th>ISBN</th>
+    <th>Status</th>
+    <th>Beschreibung</th>
+</tr>
 
-    <h2>Suchergebnisse:</h2>
-
-    <?php
-    if ($result && $result->num_rows > 0) {
-
-        echo "<table border='1' cellpadding='8' cellspacing='0'>
-                <tr>
-                    <th>Titel</th>
-                    <th>ISBN</th>
-                    <th>Status</th>
-                    <th>Beschreibung</th>
-                </tr>";
-
-        while($row = $result->fetch_assoc()) {
-
-            // Status immer "Verfügbar" für Schüler
-            echo "<tr>
-                    <td>" . htmlspecialchars($row['title']) . "</td>
-                    <td>" . htmlspecialchars($row['isbn']) . "</td>
-                    <td>Verfügbar</td>
-                    <td>" . htmlspecialchars($row['description']) . "</td>
-                  </tr>";
-        }
-
-        echo "</table>";
-
-    } else {
-        echo "Keine Bücher gefunden.";
-    }
-    ?>
+<?php if ($result && $result->num_rows > 0): ?>
+    <?php while ($row = $result->fetch_assoc()): ?>
+        <tr>
+            <td><?= htmlspecialchars($row['title']) ?></td>
+            <td><?= htmlspecialchars($row['isbn']) ?></td>
+            <td><?= $row['status'] ?></td>
+            <td><?= htmlspecialchars($row['description']) ?></td>
+        </tr>
+    <?php endwhile; ?>
+<?php else: ?>
+    <tr>
+        <td colspan="4">Keine Bücher gefunden.</td>
+    </tr>
+<?php endif; ?>
+</table>
 
 </body>
 </html>
