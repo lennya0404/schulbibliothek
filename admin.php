@@ -5,7 +5,9 @@ if (!isset($_SESSION['logged_in'])) {
     exit;
 }
 
-// DB-Verbindung
+/* =========================
+   DB-VERBINDUNG
+========================= */
 $conn = new mysqli("localhost", "root", "", "bibliothek");
 $conn->set_charset("utf8");
 
@@ -15,36 +17,50 @@ if ($conn->connect_error) {
 
 $message = "";
 
-
+/* =========================
+   FORMULAR-AKTIONEN
+========================= */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    // BUCH HINZUFÜGEN
+    /* ========= BUCH HINZUFÜGEN ========= */
     if ($_POST['action'] === 'add') {
         $title = $conn->real_escape_string($_POST['title']);
-        $isbn = $conn->real_escape_string($_POST['isbn']);
         $description = $conn->real_escape_string($_POST['description']);
         $price = $conn->real_escape_string($_POST['price']);
+
+        // ISBN automatisch +1
+        $res = $conn->query("SELECT MAX(isbn) AS max_isbn FROM books");
+        $row = $res->fetch_assoc();
+        $isbn = $row['max_isbn'] !== null ? $row['max_isbn'] + 1 : 1000000000000;
 
         $sql = "INSERT INTO books (title, isbn, description, price)
                 VALUES ('$title', '$isbn', '$description', '$price')";
-        $message = $conn->query($sql) ? "Buch hinzugefügt." : $conn->error;
+
+        if ($conn->query($sql)) {
+            $message = "Buch hinzugefügt (ISBN: $isbn)";
+        } else {
+            $message = "Fehler: " . $conn->error;
+        }
     }
 
-    // BUCH AKTUALISIEREN
+    /* ========= BUCH AKTUALISIEREN ========= */
     if ($_POST['action'] === 'update') {
         $id = (int)$_POST['id'];
         $title = $conn->real_escape_string($_POST['title']);
-        $isbn = $conn->real_escape_string($_POST['isbn']);
         $description = $conn->real_escape_string($_POST['description']);
         $price = $conn->real_escape_string($_POST['price']);
 
+        // ISBN bleibt UNVERÄNDERT
         $sql = "UPDATE books 
-                SET title='$title', isbn='$isbn', description='$description', price='$price'
+                SET title='$title',
+                    description='$description',
+                    price='$price'
                 WHERE book_id=$id";
+
         $message = $conn->query($sql) ? "Buch aktualisiert." : $conn->error;
     }
 
-    // BUCH LÖSCHEN
+    /* ========= BUCH LÖSCHEN ========= */
     if ($_POST['action'] === 'delete') {
         $id = (int)$_POST['id'];
         $conn->query("DELETE FROM reservations WHERE book_id=$id");
@@ -52,18 +68,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $message = "Buch gelöscht.";
     }
 
-    // STATUS (RESERVIERT) TOGGLE
+    /* ========= RESERVIERUNG TOGGLE ========= */
     if ($_POST['action'] === 'toggle_reservation') {
         $book_id = (int)$_POST['book_id'];
-        $user_id = 1; // Demo / Admin
+        $user_id = 1; // Demo
 
         $check = $conn->query("SELECT id FROM reservations WHERE book_id=$book_id");
         if ($check->num_rows > 0) {
             $conn->query("DELETE FROM reservations WHERE book_id=$book_id");
-
-            } else {
-            $conn->query("INSERT INTO reservations (book_id, user_id, reserved_at)
-                          VALUES ($book_id, $user_id, NOW())");
+        } else {
+            $conn->query(
+                "INSERT INTO reservations (book_id, user_id, reserved_at)
+                 VALUES ($book_id, $user_id, NOW())"
+            );
         }
     }
 }
@@ -79,7 +96,7 @@ if (isset($_GET['edit'])) {
 }
 
 /* =========================
-   BÜCHER + STATUS LADEN
+   BÜCHER LADEN
 ========================= */
 $sql = "
 SELECT 
@@ -103,11 +120,11 @@ $result = $conn->query($sql);
 </head>
 <body>
 
-<h1>Willkommen, Bibliothekar !</h1>
+<h1>Willkommen, Bibliothekar!</h1>
 <a href="logout.php">Logout</a> | <a href="index.php">Home</a>
 
 <h2>Bücher verwalten</h2>
-<p><?= $message ?></p>
+<p><?= htmlspecialchars($message) ?></p>
 
 <table border="1" cellpadding="8">
 <tr>
@@ -160,7 +177,7 @@ $result = $conn->query($sql);
     <input name="title" required value="<?= $edit_book['title'] ?? '' ?>"><br><br>
 
     ISBN:<br>
-    <input name="isbn" required value="<?= $edit_book['isbn'] ?? '' ?>"><br><br>
+    <input readonly value="<?= $edit_book['isbn'] ?? 'automatisch' ?>"><br><br>
 
     Beschreibung:<br>
     <textarea name="description" required><?= $edit_book['description'] ?? '' ?></textarea><br><br>
