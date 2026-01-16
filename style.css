@@ -1,0 +1,98 @@
+/* ===== GRUNDSTIL ===== */
+body {
+  font-family: Arial, sans-serif; /* Schriftart */
+  background-color: #f2f2f2; /* Hintergrundfarbe */
+  text-align: center; /* Text zentrieren */
+  margin: 2; /* Kein Außenabstand */
+  padding: 2; /* Kein Innenabstand */
+}
+
+/* ===== NAVIGATION ===== */
+nav {
+  background-color: #333; /* Dunkler Hintergrund */
+  padding: 10px; /* Innenabstand */
+}
+
+nav a {
+  color: white; /* Weiße Links */
+  margin: 0 10px; /* Abstand zwischen Links */
+  text-decoration: none; /* Keine Unterstreichung */
+}
+
+/* ===== ÜBERSCHRIFTEN ===== */
+h1,
+h2,
+h3 {
+  margin-top: 20px; /* Abstand nach oben */
+}
+
+/* ===== FORMULARE ===== */
+form {
+  background-color: white; /* Weißer Hintergrund */
+  width: 400px; /* Breite */
+  margin: 20px auto; /* Abstand + zentrieren */
+  padding: 20px; /* Innenabstand */
+  border-radius: 5px; /* Runde Ecken */
+}
+
+input,
+textarea,
+button {
+  width: 90%; /* Breite */
+  padding: 8px; /* Innenabstand */
+  margin: 5px 0; /* Abstand oben/unten */
+}
+
+/* ===== BUTTON ===== */
+button {
+  background-color: #333; /* Hintergrund */
+  color: white; /* Textfarbe */
+  border: none; /* Kein Rahmen */
+  cursor: pointer; /* Hand-Cursor */
+}
+
+button:hover {
+  background-color: #555; /* Effekt beim Drüberfahren */
+}
+
+/* ===== TABELLEN ===== */
+table {
+  margin: 20px auto; /* Abstand + zentrieren */
+  border-collapse: collapse; /* Zellen zusammen */
+  background-color: white; /* Hintergrund */
+}
+
+th,
+td {
+  padding: 10px; /* Innenabstand */
+  border: 1px solid #000; /* Rahmen */
+}
+
+/* ===== CHECKBOX ===== */
+input[type="checkbox"] {
+  width: auto; /* Normale Größe */
+}
+
+a {
+  color: black;
+}
+
+/* ===== TEXT ===== */
+p {
+  margin: 10px; /* Abstand */
+}
+
+/* Button für löschen und bearbeiten sodass es nebeneindander ist  */
+.actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.actions form {
+  margin: 0;
+}
+
+.actions button {
+  cursor: pointer;
+}

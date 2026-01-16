@@ -117,6 +117,7 @@ $result = $conn->query($sql);
     <meta charset="UTF-8">
     <title>Bibliothekar</title>
     <link rel="stylesheet" href="style.css">
+
 </head>
 <body>
 
@@ -152,12 +153,17 @@ $result = $conn->query($sql);
         </form>
     </td>
     <td>
-        <a href="?edit=<?= $row['book_id'] ?>">Bearbeiten</a>
-        <form method="POST" style="display:inline;">
-            <input type="hidden" name="action" value="delete">
-            <input type="hidden" name="id" value="<?= $row['book_id'] ?>">
-            <button onclick="return confirm('Wirklich löschen?')">Löschen</button>
-        </form>
+        <div class="actions">
+            <!-- Bearbeiten -->
+            <a href="?edit=<?= $row['book_id'] ?>">Bearbeiten</a>
+
+            <!-- Löschen -->
+            <form method="POST">
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="id" value="<?= $row['book_id'] ?>">
+                <button onclick="return confirm('Wirklich löschen?')">Löschen</button>
+            </form>
+        </div>
     </td>
 </tr>
 <?php endwhile; ?>
