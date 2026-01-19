@@ -1,8 +1,8 @@
 <?php
-// Session starten (für Login-Status)
+// Startet die PHP-Session (wird für Login/Logout benötigt)
 session_start();
 
-// Prüfen, ob der Benutzer eingeloggt ist
+// Prüft, ob der Benutzer eingeloggt ist
 if (!isset($_SESSION['logged_in'])) {
     // Falls nicht eingeloggt → Weiterleitung zur Login-Seite
     header("Location: login.php");
@@ -10,7 +10,7 @@ if (!isset($_SESSION['logged_in'])) {
 }
 
 /* =========================
-   DATENBANKVERBINDUNG
+   DB-VERBINDUNG
 ========================= */
 
 // Verbindung zur MySQL-Datenbank herstellen
@@ -19,39 +19,41 @@ $conn = new mysqli("localhost", "root", "", "bibliothek");
 // Zeichensatz auf UTF-8 setzen (Umlaute etc.)
 $conn->set_charset("utf8");
 
-// Prüfen, ob Verbindung fehlgeschlagen ist
+// Prüfen, ob die Verbindung fehlgeschlagen ist
 if ($conn->connect_error) {
     die("Verbindung fehlgeschlagen: " . $conn->connect_error);
 }
 
-// Variable für Statusmeldungen
+// Variable für Statusmeldungen (z. B. Erfolg / Fehler)
 $message = "";
 
 /* =========================
    FORMULAR-AKTIONEN
 ========================= */
 
-// Wird ausgeführt, wenn ein Formular abgeschickt wurde
+// Prüft, ob das Formular per POST abgeschickt wurde
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     /* ========= BUCH HINZUFÜGEN ========= */
     if ($_POST['action'] === 'add') {
 
-        // Eingaben absichern
+        // Benutzereingaben absichern (SQL-Injection-Schutz)
         $title = $conn->real_escape_string($_POST['title']);
         $description = $conn->real_escape_string($_POST['description']);
         $price = $conn->real_escape_string($_POST['price']);
 
-        // Automatische ISBN: höchste vorhandene ISBN +1
+        // ISBN automatisch um 1 erhöhen
         $res = $conn->query("SELECT MAX(isbn) AS max_isbn FROM books");
         $row = $res->fetch_assoc();
+
+        // Falls noch keine ISBN existiert → Startwert setzen
         $isbn = $row['max_isbn'] !== null ? $row['max_isbn'] + 1 : 1000000000000;
 
         // SQL-Befehl zum Einfügen eines neuen Buches
         $sql = "INSERT INTO books (title, isbn, description, price)
                 VALUES ('$title', '$isbn', '$description', '$price')";
 
-        // Erfolg oder Fehler ausgeben
+        // SQL ausführen und Erfolg/Fehler speichern
         if ($conn->query($sql)) {
             $message = "Buch hinzugefügt (ISBN: $isbn)";
         } else {
@@ -62,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     /* ========= BUCH AKTUALISIEREN ========= */
     if ($_POST['action'] === 'update') {
 
-        // Buch-ID als Integer
+        // Buch-ID aus dem Formular (als Integer)
         $id = (int)$_POST['id'];
 
         // Eingaben absichern
@@ -70,44 +72,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $description = $conn->real_escape_string($_POST['description']);
         $price = $conn->real_escape_string($_POST['price']);
 
-        // ISBN bleibt unverändert
+        // ISBN bleibt UNVERÄNDERT
         $sql = "UPDATE books 
                 SET title='$title',
                     description='$description',
                     price='$price'
                 WHERE book_id=$id";
 
+        // Update ausführen und Meldung setzen
         $message = $conn->query($sql) ? "Buch aktualisiert." : $conn->error;
     }
 
     /* ========= BUCH LÖSCHEN ========= */
     if ($_POST['action'] === 'delete') {
 
+        // Buch-ID aus dem Formular
         $id = (int)$_POST['id'];
 
-        // Erst Reservierungen löschen (Fremdschlüssel!)
+        // Zuerst alle Reservierungen zu diesem Buch löschen
         $conn->query("DELETE FROM reservations WHERE book_id=$id");
 
-        // Danach Buch löschen
+        // Danach das Buch selbst löschen
         $conn->query("DELETE FROM books WHERE book_id=$id");
 
+        // Bestätigungsmeldung
         $message = "Buch gelöscht.";
     }
 
-    /* ========= RESERVIERUNG UMSCHALTEN ========= */
+    /* ========= RESERVIERUNG TOGGLE ========= */
     if ($_POST['action'] === 'toggle_reservation') {
 
+        // Buch-ID aus dem Formular
         $book_id = (int)$_POST['book_id'];
-        $user_id = 1; // Demo-Benutzer
 
-        // Prüfen, ob Buch bereits reserviert ist
+        // Demo-User-ID (normalerweise aus Session)
+        $user_id = 1;
+
+        // Prüfen, ob das Buch bereits reserviert ist
         $check = $conn->query("SELECT id FROM reservations WHERE book_id=$book_id");
 
         if ($check->num_rows > 0) {
-            // Falls ja → Reservierung entfernen
+            // Falls reserviert → Reservierung löschen
             $conn->query("DELETE FROM reservations WHERE book_id=$book_id");
         } else {
-            // Falls nein → Reservierung hinzufügen
+            // Falls nicht reserviert → neue Reservierung anlegen
             $conn->query(
                 "INSERT INTO reservations (book_id, user_id, reserved_at)
                  VALUES ($book_id, $user_id, NOW())"
@@ -117,23 +125,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 /* =========================
-   BUCH ZUM BEARBEITEN LADEN
+   BUCH BEARBEITEN
 ========================= */
 
+// Variable für das aktuell zu bearbeitende Buch
 $edit_book = null;
 
-// Wenn Bearbeiten-Button gedrückt wurde
+// Prüft, ob ein Buch bearbeitet werden soll
 if (isset($_GET['edit'])) {
+
+    // Buch-ID aus der URL
     $id = (int)$_GET['edit'];
+
+    // Buchdaten aus der Datenbank laden
     $res = $conn->query("SELECT * FROM books WHERE book_id=$id");
     $edit_book = $res->fetch_assoc();
 }
 
 /* =========================
-   BÜCHERLISTE LADEN
+   BÜCHER LADEN
 ========================= */
 
-// Bücher mit Reservierungsstatus laden
+// SQL-Abfrage zum Laden aller Bücher inkl. Reservierungsstatus
 $sql = "
 SELECT 
     b.book_id, b.title, b.isbn, b.description, b.price,
@@ -145,5 +158,103 @@ FROM books b
 LEFT JOIN reservations r ON b.book_id = r.book_id
 ";
 
+// Abfrage ausführen
 $result = $conn->query($sql);
 ?>
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Bibliothekar</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>Willkommen, Bibliothekar!</h1>
+
+<!-- Navigation -->
+<a href="logout.php">Logout</a> | <a href="index.php">Home</a>
+
+<h2>Bücher verwalten</h2>
+
+<!-- Statusmeldung ausgeben -->
+<p><?= htmlspecialchars($message) ?></p>
+
+<!-- Tabelle mit allen Büchern -->
+<table border="1" cellpadding="8">
+<tr>
+    <th>Titel</th>
+    <th>ISBN</th>
+    <th>Beschreibung</th>
+    <th>Preis</th>
+    <th>Status</th>
+    <th>Aktionen</th>
+</tr>
+
+<?php while ($row = $result->fetch_assoc()): ?>
+<tr>
+    <!-- Buchdaten anzeigen -->
+    <td><?= htmlspecialchars($row['title']) ?></td>
+    <td><?= htmlspecialchars($row['isbn']) ?></td>
+    <td><?= htmlspecialchars($row['description']) ?></td>
+    <td><?= htmlspecialchars($row['price']) ?></td>
+
+    <!-- Reservierungsstatus -->
+    <td>
+        <form method="POST">
+            <input type="hidden" name="action" value="toggle_reservation">
+            <input type="hidden" name="book_id" value="<?= $row['book_id'] ?>">
+            <input type="checkbox" onchange="this.form.submit()"
+                <?= $row['status'] === 'reserviert' ? 'checked' : '' ?>>
+            reserviert
+        </form>
+    </td>
+
+    <!-- Aktionen -->
+    <td>
+        <div class="actions">
+            <!-- Bearbeiten-Link -->
+            <a href="?edit=<?= $row['book_id'] ?>">Bearbeiten</a>
+
+            <!-- Löschen-Formular -->
+            <form method="POST">
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="id" value="<?= $row['book_id'] ?>">
+                <button onclick="return confirm('Wirklich löschen?')">Löschen</button>
+            </form>
+        </div>
+    </td>
+</tr>
+<?php endwhile; ?>
+</table>
+
+<hr>
+
+<!-- Formular zum Hinzufügen oder Bearbeiten -->
+<h3><?= $edit_book ? "Buch bearbeiten" : "Neues Buch" ?></h3>
+
+<form method="POST">
+    <input type="hidden" name="action" value="<?= $edit_book ? 'update' : 'add' ?>">
+
+    <?php if ($edit_book): ?>
+        <input type="hidden" name="id" value="<?= $edit_book['book_id'] ?>">
+    <?php endif; ?>
+
+    Titel:<br>
+    <input name="title" required value="<?= $edit_book['title'] ?? '' ?>"><br><br>
+
+    ISBN:<br>
+    <input readonly value="<?= $edit_book['isbn'] ?? 'automatisch' ?>"><br><br>
+
+    Beschreibung:<br>
+    <textarea name="description" required><?= $edit_book['description'] ?? '' ?></textarea><br><br>
+
+    Preis:<br>
+    <input name="price" required value="<?= $edit_book['price'] ?? '' ?>"><br><br>
+
+    <button><?= $edit_book ? "Aktualisieren" : "Hinzufügen" ?></button>
+</form>
+
+</body>
+</html>

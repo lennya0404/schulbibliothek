@@ -1,21 +1,32 @@
 <?php
+// Startet eine Session (z.B. für Login-Status)
 session_start();
 
-// DB-Verbindung
+// ----------------------------
+// Datenbankverbindung
+// ----------------------------
 $conn = new mysqli("localhost", "root", "", "bibliothek");
 $conn->set_charset("utf8");
 
+// Prüft, ob die Verbindung fehlgeschlagen ist
 if ($conn->connect_error) {
     die("Verbindung fehlgeschlagen: " . $conn->connect_error);
 }
 
-// Suche
+// ----------------------------
+// Suchbegriff initialisieren
+// ----------------------------
 $search = "";
+
+// Prüft, ob ein Suchbegriff über GET übergeben wurde
 if (isset($_GET['q'])) {
+    // Schutz vor SQL-Injection
     $search = $conn->real_escape_string($_GET['q']);
 }
 
-// Bücher + Status laden
+// ----------------------------
+// SQL-Abfrage: Bücher + Reservierungsstatus
+// ----------------------------
 $sql = "
 SELECT 
     b.book_id,
@@ -30,6 +41,7 @@ FROM books b
 LEFT JOIN reservations r ON b.book_id = r.book_id
 ";
 
+// Falls ein Suchbegriff existiert, wird die WHERE-Bedingung ergänzt
 if (!empty($search)) {
     $sql .= " WHERE 
         b.title LIKE '%$search%' 
@@ -37,6 +49,7 @@ if (!empty($search)) {
         OR b.isbn LIKE '%$search%'";
 }
 
+// SQL-Abfrage ausführen
 $result = $conn->query($sql);
 ?>
 
@@ -45,15 +58,20 @@ $result = $conn->query($sql);
 <head>
     <meta charset="UTF-8">
     <title>Büchersuche</title>
+    <!-- Externe CSS-Datei -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+<!-- Navigationsleiste -->
 <nav>
     <a href="index.php">Home</a>
+
+    <!-- Wenn nicht eingeloggt, Login anzeigen -->
     <?php if (!isset($_SESSION['logged_in'])): ?>
         <a href="login.php">Login</a>
     <?php else: ?>
+        <!-- Wenn eingeloggt, Admin- und Logout-Link anzeigen -->
         <a href="admin.php">Admin</a>
         <a href="logout.php">Logout</a>
     <?php endif; ?>
@@ -61,13 +79,16 @@ $result = $conn->query($sql);
 
 <h1>Büchersuche</h1>
 
+<!-- Suchformular -->
 <form method="GET">
+    <!-- htmlspecialchars schützt vor XSS -->
     <input type="text" name="q" value="<?= htmlspecialchars($search) ?>">
     <button>Suchen</button>
 </form>
 
 <hr>
 
+<!-- Ergebnistabelle -->
 <table border="1" cellpadding="8">
 <tr>
     <th>Titel</th>
@@ -77,6 +98,7 @@ $result = $conn->query($sql);
 </tr>
 
 <?php if ($result && $result->num_rows > 0): ?>
+    <!-- Alle gefundenen Bücher anzeigen -->
     <?php while ($row = $result->fetch_assoc()): ?>
         <tr>
             <td><?= htmlspecialchars($row['title']) ?></td>
@@ -86,6 +108,7 @@ $result = $conn->query($sql);
         </tr>
     <?php endwhile; ?>
 <?php else: ?>
+    <!-- Falls keine Bücher gefunden wurden -->
     <tr>
         <td colspan="4">Keine Bücher gefunden.</td>
     </tr>
