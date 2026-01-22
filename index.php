@@ -1,5 +1,4 @@
 <?php
-// Startet eine Session (z.B. für Login-Status)
 session_start();
 
 // ----------------------------
