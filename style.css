@@ -1,98 +1,51 @@
-/* ===== GRUNDSTIL ===== */
-body {
-  font-family: Arial, sans-serif;
-  background-color: #f2f2f2;
-  text-align: center; /* Text zentrieren */
-  margin: 0;
-  padding: 0;
+/* ===== RESPONSIVE ÄNDERUNGEN ===== */
+
+/* Für Tablets und Handys */
+@media (max-width: 768px) {
+  body {
+    padding: 15px;
+    text-align: left;
+  }
+
+  form {
+    width: 95%;
+    margin: 20px auto;
+    padding: 15px;
+  }
+
+  .table-container {
+    overflow-x: auto;
+    margin: 20px -15px;
+  }
+
+  table {
+    min-width: 600px;
+  }
 }
 
-/* ===== NAVIGATION ===== */
-nav {
-  background-color: #333;
-  padding: 10px; /* Innenabstand */
-}
+/* Für Handys */
+@media (max-width: 480px) {
+  h1 {
+    font-size: 1.5rem;
+  }
 
-nav a {
-  color: white;
-  margin: 0 10px;
-  text-decoration: none;
-}
+  h2 {
+    font-size: 1.2rem;
+  }
 
-/* ===== ÜBERSCHRIFTEN ===== */
-h1,
-h2,
-h3 {
-  margin-top: 20px;
-}
+  nav a {
+    display: inline-block;
+    margin: 5px;
+  }
 
-/* ===== FORMULARE ===== */
-form {
-  background-color: white;
-  width: 400px;
-  margin: 20px auto;
-  padding: 20px;
-  border-radius: 5px; /* Runde Ecken */
-}
+  .actions {
+    flex-direction: column;
+    gap: 5px;
+  }
 
-input,
-textarea,
-button {
-  width: 90%;
-  padding: 8px;
-  margin: 5px 0;
-}
-
-/* ===== BUTTON ===== */
-button {
-  background-color: #333;
-  color: white;
-  border: none;
-  cursor: pointer; /* Hand-Cursor */
-}
-
-button:hover {
-  background-color: #555; /* Effekt beim Drüberfahren */
-}
-
-/* ===== TABELLEN ===== */
-table {
-  margin: 20px auto; /* Abstand + zentrieren */
-  border-collapse: collapse; /* Zellen zusammen */
-  background-color: white;
-}
-
-th,
-td {
-  padding: 10px; /* Innenabstand */
-  border: 1px solid #000;
-}
-
-/* ===== CHECKBOX ===== */
-input[type="checkbox"] {
-  width: auto;
-}
-
-a {
-  color: black;
-}
-
-/* ===== TEXT ===== */
-p {
-  margin: 10px;
-}
-
-/* Button für löschen und bearbeiten sodass es nebeneindander ist  */
-.actions {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.actions form {
-  margin: 0;
-}
-
-.actions button {
-  cursor: pointer;
+  .actions a,
+  .actions form button {
+    width: 100%;
+    text-align: center;
+  }
 }

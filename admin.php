@@ -167,7 +167,26 @@ $result = $conn->query($sql);
 <head>
     <meta charset="UTF-8">
     <title>Bibliothekar</title>
+    <!-- MINIMALE ÄNDERUNG: Viewport für Responsive -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
+    <!-- MINIMALE ÄNDERUNG: Inline-Style für Tabelle -->
+    <style>
+        .table-container { overflow-x: auto; margin: 20px 0; }
+        @media (max-width: 768px) {
+            body { padding: 15px; text-align: left; }
+            form { width: 95%; margin: 20px auto; padding: 15px; }
+            .table-container { margin: 20px -15px; }
+            table { min-width: 600px; }
+        }
+        @media (max-width: 480px) {
+            h1 { font-size: 1.5rem; }
+            h2 { font-size: 1.2rem; }
+            nav a { display: inline-block; margin: 5px; }
+            .actions { flex-direction: column; gap: 5px; }
+            .actions a, .actions form button { width: 100%; text-align: center; }
+        }
+    </style>
 </head>
 <body>
 
@@ -181,6 +200,8 @@ $result = $conn->query($sql);
 <!-- Statusmeldung ausgeben -->
 <p><?= htmlspecialchars($message) ?></p>
 
+<!-- MINIMALE ÄNDERUNG: Container um Tabelle -->
+<div class="table-container">
 <!-- Tabelle mit allen Büchern -->
 <table border="1" cellpadding="8">
 <tr>
@@ -228,6 +249,7 @@ $result = $conn->query($sql);
 </tr>
 <?php endwhile; ?>
 </table>
+</div> <!-- ENDE table-container -->
 
 <hr>
 
