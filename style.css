@@ -1,4 +1,24 @@
 /* Grundlegende Styles */
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap");
+
+body {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: "Roboto", sans-serif;
+  line-height: 1.6;
+}
+
+header {
+  background-color: black;
+  color: white;
+  padding: 15px;
+  text-align: center;
+  margin-bottom: 20px;
+  font-weight: 700;
+  font-size: 1.2em;
+}
+
 .table-container {
   overflow-x: auto;
   margin: 20px 0;
@@ -7,34 +27,83 @@
 .reservation-form {
   display: flex;
   align-items: center;
-  gap: 3px; /* Reduziert von 5px auf 3px */
-}
-
-/* Kleinere Buttons und Inputs */
-.actions a,
-.actions button {
-  padding: 4px 8px; /* Reduziert */
-  font-size: 0.85em; /* Kleinere Schrift */
-}
-
-.reservation-form input[type="text"] {
-  width: 80px; /* Kürzere Namensbox */
-  padding: 4px 6px;
-  font-size: 0.85em;
-}
-
-.reservation-form button {
-  padding: 4px 8px;
-  font-size: 0.85em;
-  white-space: nowrap;
+  gap: 5px;
+  font-family: "Roboto", sans-serif;
 }
 
 /* Aktionen horizontal halten */
 .actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 3px;
+  gap: 5px;
   align-items: center;
+  font-family: "Roboto", sans-serif;
+}
+
+/* Styling für alle Buttons und Links */
+.actions a,
+.actions button {
+  padding: 6px 10px;
+  font-size: 0.9em;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  font-family: "Roboto", sans-serif;
+}
+
+/* Reservierungs-Buttons */
+.reservation-form button {
+  padding: 6px 10px;
+  font-size: 0.9em;
+  white-space: nowrap;
+  border-radius: 4px;
+  border: 1px solid;
+  transition: all 0.2s ease;
+  font-family: "Roboto", sans-serif;
+}
+button {
+  border: 1px solid black !important;
+  color: black !important;
+  font-family: "Roboto", sans-serif;
+}
+
+button a {
+  color: black;
+  font-family: "Roboto", sans-serif;
+}
+
+/* Namens-Input */
+.reservation-form input[type="text"] {
+  width: 90px;
+  padding: 6px 8px;
+  font-size: 0.9em;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  transition: border-color 0.2s;
+  font-family: "Roboto", sans-serif;
+}
+
+.reservation-form input[type="text"]:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+/* Active State für alle Buttons */
+.actions a:active,
+.actions button:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* Disabled State */
+.actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 /* Responsive für Tablets */
@@ -42,6 +111,7 @@
   body {
     padding: 10px;
     text-align: left;
+    font-family: "Roboto", sans-serif;
   }
 
   .table-container {
@@ -49,16 +119,26 @@
   }
 
   table {
-    min-width: 650px; /* Etwas kleiner */
+    min-width: 650px;
+    font-family: "Roboto", sans-serif;
   }
 
   .reservation-form input[type="text"] {
-    width: 70px; /* Noch kürzer auf Tablets */
+    width: 80px;
+    font-family: "Roboto", sans-serif;
   }
 
   /* Auf Tablets bleiben Buttons in einer Zeile */
   .actions {
     flex-wrap: nowrap;
+  }
+
+  .actions a,
+  .actions button,
+  .reservation-form button {
+    padding: 5px 8px;
+    font-size: 0.85em;
+    font-family: "Roboto", sans-serif;
   }
 }
 
@@ -67,41 +147,69 @@
   h1 {
     font-size: 1.4rem;
     margin-top: 10px;
+    font-family: "Roboto", sans-serif;
   }
 
   h2 {
     font-size: 1.2rem;
+    font-family: "Roboto", sans-serif;
   }
 
   h3 {
     font-size: 1.1rem;
+    font-family: "Roboto", sans-serif;
   }
 
   nav a {
     display: block;
     margin: 5px 0;
     padding: 8px;
+    font-family: "Roboto", sans-serif;
   }
 
   table th,
   table td {
     padding: 6px 8px;
     font-size: 0.9em;
+    font-family: "Roboto", sans-serif;
   }
 
   .reservation-form input[type="text"] {
-    width: 60px; /* Sehr kurz auf Handys */
+    width: 70px;
+    padding: 5px 6px;
+    font-size: 0.85em;
+    font-family: "Roboto", sans-serif;
   }
 
-  /* Extrem kleine Buttons auf sehr kleinen Bildschirmen */
+  /* Kleinere Buttons auf Handys */
   .actions a,
   .actions button {
-    padding: 3px 6px;
+    padding: 4px 6px;
     font-size: 0.8em;
+    font-family: "Roboto", sans-serif;
   }
 
   .reservation-form button {
-    padding: 3px 6px;
+    padding: 4px 6px;
+    font-size: 0.8em;
+    font-family: "Roboto", sans-serif;
+  }
+
+  /* Kürzere Texte auf kleinen Bildschirmen */
+  .actions a {
+    content: "Edit";
+  }
+
+  .actions form[action*="delete"] button {
+    content: "Del";
+  }
+
+  .reservation-form button[type="submit"]:not([title*="löschen"]) {
+    content: "Res";
+  }
+
+  .reservation-form button[type="submit"][title*="löschen"] {
+    content: "Free";
   }
 }
 
@@ -109,18 +217,30 @@
 @media (max-width: 320px) {
   body {
     padding: 5px;
+    font-family: "Roboto", sans-serif;
   }
 
   h1 {
     font-size: 1.3rem;
+    font-family: "Roboto", sans-serif;
   }
 
   table {
     font-size: 0.85em;
+    font-family: "Roboto", sans-serif;
   }
 
   .reservation-form input[type="text"] {
-    width: 50px; /* Minimal breit */
+    width: 60px;
     font-size: 0.8em;
+    font-family: "Roboto", sans-serif;
+  }
+
+  .actions a,
+  .actions button {
+    padding: 3px 5px;
+    font-size: 0.75em;
+    border-radius: 3px;
+    font-family: "Roboto", sans-serif;
   }
 }

@@ -222,18 +222,18 @@ $result = $conn->query($sql);
             Verfügbar
         <?php endif; ?>
     </td>
-
     <!-- Aktionen -->
     <td>
         <div class="actions">
             <!-- Bearbeiten-Link -->
-            <a href="?edit=<?= $row['book_id'] ?>">Bearbeiten</a>
+            <button><a href="?edit=<?= $row['book_id'] ?>" title="Buch bearbeiten">Bearbeiten</a></button>
 
             <!-- Löschen-Formular -->
             <form method="POST">
                 <input type="hidden" name="action" value="delete">
                 <input type="hidden" name="id" value="<?= $row['book_id'] ?>">
-                <button onclick="return confirm('Wirklich löschen?')">Löschen</button>
+                <button type="button" onclick="if(confirm('Buch wirklich löschen?')) this.form.submit();" 
+                        title="Buch löschen">Löschen</button>
             </form>
             
             <!-- Reservierungs-Formular -->
@@ -243,11 +243,11 @@ $result = $conn->query($sql);
                 
                 <?php if ($row['status'] === 'reserviert'): ?>
                     <!-- Falls bereits reserviert: Button zum Löschen -->
-                    <button type="submit">Reservierung löschen</button>
+                    <button type="submit" title="Reservierung löschen">Reservierung löschen</button>
                 <?php else: ?>
                     <!-- NEU: Nur bei verfügbaren Büchern: Namensfeld anzeigen -->
-                    <input type="text" name="reserver_name" placeholder="Name" required>
-                    <button type="submit">Reservieren</button>
+                    <input type="text" name="reserver_name" placeholder="Name" required maxlength="20">
+                    <button type="submit" title="Buch reservieren">Reservieren</button>
                 <?php endif; ?>
             </form>
         </div>
