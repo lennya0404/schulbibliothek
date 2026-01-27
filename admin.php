@@ -1,5 +1,5 @@
 <?php
-// Startet die PHP-Session (wird für Login/Logout benötigt)
+//  für Login/Logout benötigt
 session_start();
 
 // Prüft, ob der Benutzer eingeloggt ist
@@ -99,7 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $message = "Buch gelöscht.";
     }
 
-    /* ========= RESERVIERUNG TOGGLE ========= */
+    /* ========= RESERVIERUNG  ========= */
     if ($_POST['action'] === 'toggle_reservation') {
 
         // Buch-ID aus dem Formular
