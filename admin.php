@@ -1,5 +1,5 @@
 <?php
-//  für Login/Logout benötigt
+// für Login/Logout benötigt
 session_start();
 
 // Prüft, ob der Benutzer eingeloggt ist
@@ -105,9 +105,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Buch-ID aus dem Formular
         $book_id = (int)$_POST['book_id'];
 
-        // Demo-User-ID (normalerweise aus Session)
-        $user_id = 1;
-
         // Prüfen, ob das Buch bereits reserviert ist
         $check = $conn->query("SELECT id FROM reservations WHERE book_id=$book_id");
 
@@ -115,11 +112,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Falls reserviert → Reservierung löschen
             $conn->query("DELETE FROM reservations WHERE book_id=$book_id");
         } else {
-            // Falls nicht reserviert → neue Reservierung anlegen
-            $conn->query(
-                "INSERT INTO reservations (book_id, user_id, reserved_at)
-                 VALUES ($book_id, $user_id, NOW())"
-            );
+            // NEU: Namen für Reservierung abfragen
+            // Prüfen, ob Name eingegeben wurde
+            if (empty($_POST['reserver_name'])) {
+                $message = "Bitte geben Sie einen Namen für die Reservierung ein.";
+            } else {
+                // Namen absichern
+                $reserver_name = $conn->real_escape_string($_POST['reserver_name']);
+                
+                // NEU: Mit Namen in Reservierungstabelle eintragen
+                $conn->query(
+                    "INSERT INTO reservations (book_id, reserver_name, reserved_at)
+                     VALUES ($book_id, '$reserver_name', NOW())"
+                );
+            }
         }
     }
 }
@@ -147,13 +153,15 @@ if (isset($_GET['edit'])) {
 ========================= */
 
 // SQL-Abfrage zum Laden aller Bücher inkl. Reservierungsstatus
+// NEU: Jetzt auch mit Reservierungsnamen
 $sql = "
 SELECT 
     b.book_id, b.title, b.isbn, b.description, b.price,
     CASE 
         WHEN r.id IS NULL THEN 'verfügbar'
         ELSE 'reserviert'
-    END AS status
+    END AS status,
+    r.reserver_name  -- NEU: Reservierungsnamen mit laden
 FROM books b
 LEFT JOIN reservations r ON b.book_id = r.book_id
 ";
@@ -167,26 +175,10 @@ $result = $conn->query($sql);
 <head>
     <meta charset="UTF-8">
     <title>Bibliothekar</title>
-    <!-- MINIMALE ÄNDERUNG: Viewport für Responsive -->
+    <!-- Responsive Viewport -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Externe CSS-Datei -->
     <link rel="stylesheet" href="style.css">
-    <!-- MINIMALE ÄNDERUNG: Inline-Style für Tabelle -->
-    <style>
-        .table-container { overflow-x: auto; margin: 20px 0; }
-        @media (max-width: 768px) {
-            body { padding: 15px; text-align: left; }
-            form { width: 95%; margin: 20px auto; padding: 15px; }
-            .table-container { margin: 20px -15px; }
-            table { min-width: 600px; }
-        }
-        @media (max-width: 480px) {
-            h1 { font-size: 1.5rem; }
-            h2 { font-size: 1.2rem; }
-            nav a { display: inline-block; margin: 5px; }
-            .actions { flex-direction: column; gap: 5px; }
-            .actions a, .actions form button { width: 100%; text-align: center; }
-        }
-    </style>
 </head>
 <body>
 
@@ -200,7 +192,7 @@ $result = $conn->query($sql);
 <!-- Statusmeldung ausgeben -->
 <p><?= htmlspecialchars($message) ?></p>
 
-<!-- MINIMALE ÄNDERUNG: Container um Tabelle -->
+<!-- Container für horizontales Scrollen auf kleinen Geräten -->
 <div class="table-container">
 <!-- Tabelle mit allen Büchern -->
 <table border="1" cellpadding="8">
@@ -223,13 +215,12 @@ $result = $conn->query($sql);
 
     <!-- Reservierungsstatus -->
     <td>
-        <form method="POST">
-            <input type="hidden" name="action" value="toggle_reservation">
-            <input type="hidden" name="book_id" value="<?= $row['book_id'] ?>">
-            <input type="checkbox" onchange="this.form.submit()"
-                <?= $row['status'] === 'reserviert' ? 'checked' : '' ?>>
-            reserviert
-        </form>
+        <?php if ($row['status'] === 'reserviert'): ?>
+            <!-- NEU: Reservierungsnamen anzeigen, falls vorhanden -->
+            Reserviert<?= $row['reserver_name'] ? " von: " . htmlspecialchars($row['reserver_name']) : '' ?>
+        <?php else: ?>
+            Verfügbar
+        <?php endif; ?>
     </td>
 
     <!-- Aktionen -->
@@ -243,6 +234,21 @@ $result = $conn->query($sql);
                 <input type="hidden" name="action" value="delete">
                 <input type="hidden" name="id" value="<?= $row['book_id'] ?>">
                 <button onclick="return confirm('Wirklich löschen?')">Löschen</button>
+            </form>
+            
+            <!-- Reservierungs-Formular -->
+            <form method="POST" class="reservation-form">
+                <input type="hidden" name="action" value="toggle_reservation">
+                <input type="hidden" name="book_id" value="<?= $row['book_id'] ?>">
+                
+                <?php if ($row['status'] === 'reserviert'): ?>
+                    <!-- Falls bereits reserviert: Button zum Löschen -->
+                    <button type="submit">Reservierung löschen</button>
+                <?php else: ?>
+                    <!-- NEU: Nur bei verfügbaren Büchern: Namensfeld anzeigen -->
+                    <input type="text" name="reserver_name" placeholder="Name" required>
+                    <button type="submit">Reservieren</button>
+                <?php endif; ?>
             </form>
         </div>
     </td>

@@ -1,51 +1,126 @@
-/* ===== RESPONSIVE ÄNDERUNGEN ===== */
+/* Grundlegende Styles */
+.table-container {
+  overflow-x: auto;
+  margin: 20px 0;
+}
 
-/* Für Tablets und Handys */
+.reservation-form {
+  display: flex;
+  align-items: center;
+  gap: 3px; /* Reduziert von 5px auf 3px */
+}
+
+/* Kleinere Buttons und Inputs */
+.actions a,
+.actions button {
+  padding: 4px 8px; /* Reduziert */
+  font-size: 0.85em; /* Kleinere Schrift */
+}
+
+.reservation-form input[type="text"] {
+  width: 80px; /* Kürzere Namensbox */
+  padding: 4px 6px;
+  font-size: 0.85em;
+}
+
+.reservation-form button {
+  padding: 4px 8px;
+  font-size: 0.85em;
+  white-space: nowrap;
+}
+
+/* Aktionen horizontal halten */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  align-items: center;
+}
+
+/* Responsive für Tablets */
 @media (max-width: 768px) {
   body {
-    padding: 15px;
+    padding: 10px;
     text-align: left;
   }
 
-  form {
-    width: 95%;
-    margin: 20px auto;
-    padding: 15px;
-  }
-
   .table-container {
-    overflow-x: auto;
-    margin: 20px -15px;
+    margin: 15px -10px;
   }
 
   table {
-    min-width: 600px;
+    min-width: 650px; /* Etwas kleiner */
+  }
+
+  .reservation-form input[type="text"] {
+    width: 70px; /* Noch kürzer auf Tablets */
+  }
+
+  /* Auf Tablets bleiben Buttons in einer Zeile */
+  .actions {
+    flex-wrap: nowrap;
   }
 }
 
-/* Für Handys */
+/* Responsive für Handys */
 @media (max-width: 480px) {
   h1 {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
+    margin-top: 10px;
   }
 
   h2 {
     font-size: 1.2rem;
   }
 
+  h3 {
+    font-size: 1.1rem;
+  }
+
   nav a {
-    display: inline-block;
-    margin: 5px;
+    display: block;
+    margin: 5px 0;
+    padding: 8px;
   }
 
-  .actions {
-    flex-direction: column;
-    gap: 5px;
+  table th,
+  table td {
+    padding: 6px 8px;
+    font-size: 0.9em;
   }
 
+  .reservation-form input[type="text"] {
+    width: 60px; /* Sehr kurz auf Handys */
+  }
+
+  /* Extrem kleine Buttons auf sehr kleinen Bildschirmen */
   .actions a,
-  .actions form button {
-    width: 100%;
-    text-align: center;
+  .actions button {
+    padding: 3px 6px;
+    font-size: 0.8em;
+  }
+
+  .reservation-form button {
+    padding: 3px 6px;
+  }
+}
+
+/* Für sehr kleine Handys */
+@media (max-width: 320px) {
+  body {
+    padding: 5px;
+  }
+
+  h1 {
+    font-size: 1.3rem;
+  }
+
+  table {
+    font-size: 0.85em;
+  }
+
+  .reservation-form input[type="text"] {
+    width: 50px; /* Minimal breit */
+    font-size: 0.8em;
   }
 }
